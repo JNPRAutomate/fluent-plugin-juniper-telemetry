@@ -1,0 +1,1 @@
+docker run --rm -t  -p 51020:51020/udp -i fluent-plugin-juniper-telemetry /sbin/my_init -- bash -l

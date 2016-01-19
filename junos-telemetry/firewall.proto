@@ -1,0 +1,134 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+//
+// This defines the GPB message format used by the firewall sensor.
+//
+// The top level messages is g_firewall
+//
+// Copyrights (c)  2015, Juniper Networks, Inc.
+// All rights reserved.
+//
+
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+import "jvision_top.proto";
+
+message MemoryUsage {
+    required string name                = 1 [(telemetry_options).is_key = true];
+
+    // The amount of the memory allocated in bytes to the filter
+    required uint64 allocated           = 2 [(telemetry_options).is_gauge = true];
+}
+
+message CounterStats {
+    // Counter name
+    required string name   = 1 [(telemetry_options).is_key = true]; 
+
+    // Counter: the total number of packets seen by the counter
+    optional uint64 pkts   = 2 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes seen by the counter
+    optional uint64 bytes  = 3 [(telemetry_options).is_counter = true];
+}
+
+message ExtendedPolicerStats {
+    // Counter: the total number of packets subjected to policing
+    optional uint64 offered_pkts        = 1 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes subjected to policing
+    optional uint64 offered_bytes       = 2 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of packets that is not discarded by the policer
+    optional uint64 tx_pkts             = 3 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes that is not discarded by the policer
+    optional uint64 tx_bytes            = 4 [(telemetry_options).is_counter = true];
+}
+
+message PolicerStats {
+    // Policer instance name
+    required string name = 1 [(telemetry_options).is_key = true]; 
+
+    // Counter: the total number of packets marked out-of-spec by the policer
+    optional uint64 out_of_spec_pkts = 2 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes marked out-of-spec by the policer
+    optional uint64 out_of_spec_bytes = 3 [(telemetry_options).is_counter = true];
+
+    // Available when enhanced-policer is enabled
+    optional ExtendedPolicerStats extended_policer_stats = 4;
+}
+
+message HierPolicerStats {
+    // Hierarchical policer instance name
+    required string name                = 1 [(telemetry_options).is_key = true];
+
+    // Counter: the total number of packets marked out-of-spec by the premium policer
+    optional uint64 premium_pkts        = 2 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes marked out-of-spec by the premium policer
+    optional uint64 premium_bytes       = 3 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of packets marked out-of-spec by the aggregate policer
+    optional uint64 aggregate_pkts      = 4 [(telemetry_options).is_counter = true];
+
+    // Counter: the total number of bytes marked out-of-spec by the aggregate policer
+    optional uint64 aggregate_bytes     = 5 [(telemetry_options).is_counter = true];
+}
+
+message FirewallStats {
+    required string filter_name                  = 1 [(telemetry_options).is_key = true];
+
+    // Timestamp (seconds since epoch) of last filter state change event that
+    // could be filter add, filter change, or counter clear.
+    optional uint64 timestamp                    = 2 [(telemetry_options).is_timestamp = true];
+
+    repeated MemoryUsage memory_usage            = 3;
+    repeated CounterStats counter_stats          = 4;   
+    repeated PolicerStats policer_stats          = 5;  
+    repeated HierPolicerStats hier_policer_stats = 6;
+}
+
+message g_firewall {
+    repeated FirewallStats firewall_stats = 1;
+}
+            
+//
+// This occupies branch 6 from JuniperNetworksSensors
+//
+extend JuniperNetworksSensors {
+    optional g_firewall jnpr_firewall_ext = 6;
+}
+

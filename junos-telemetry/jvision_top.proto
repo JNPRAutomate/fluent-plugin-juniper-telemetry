@@ -1,0 +1,98 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+//
+// This defines the top level gpb message format used for all gpb-encoded jvision packets
+//
+// The top level message is TelemetryStream
+//
+// Copyrights (c)  2015, Juniper Networks, Inc.
+// All rights reserved.
+//
+
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+
+import "google/protobuf/descriptor.proto";
+ 
+message TelemetryFieldOptions {
+    optional bool is_key = 1;
+    optional bool is_timestamp = 2;
+    optional bool is_counter = 3;
+    optional bool is_gauge = 4;
+}
+ 
+extend google.protobuf.FieldOptions {
+    optional TelemetryFieldOptions telemetry_options = 1024;
+}
+ 
+message JuniperNetworksSensors {
+    extensions 1 to max;
+}
+
+message EnterpriseSensors {
+    // re-use IANA assigned numbers
+    optional JuniperNetworksSensors juniperNetworks = 2636;
+
+    extensions 1 to 2635;
+    extensions 2637 to max;
+}
+
+message IETFSensors {
+    extensions 1 to max;
+}
+
+message TelemetryStream {
+    // router name or export IP address    
+    required string system_id        = 1 [(telemetry_options).is_key = true];
+
+    // line card / RE (slot number)
+    optional uint32 component_id     = 2 [(telemetry_options).is_key = true];
+
+    // PFE (if applicable)
+    optional uint32 sub_component_id = 3 [(telemetry_options).is_key = true];
+
+    // configured sensor name
+    optional string sensor_name      = 4 [(telemetry_options).is_key = true];
+
+    // sequence number, monotonically increasesing for each
+    // system_id, component_id, sub_component_id + sensor_name. 
+    optional uint32 sequence_number  = 5 [(telemetry_options).is_key = true];
+
+    // timestamp (seconds since epoch)
+    optional uint64 timestamp        = 6 [(telemetry_options).is_timestamp = true];
+
+    optional IETFSensors ietf =  100; 
+    optional EnterpriseSensors enterprise = 101;
+}

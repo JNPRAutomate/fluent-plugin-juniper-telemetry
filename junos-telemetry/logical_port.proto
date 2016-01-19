@@ -1,0 +1,128 @@
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements. See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership. The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License. You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations
+// under the License.
+
+//
+// Licensed to the Apache Software Foundation (ASF) under one
+// or more contributor license agreements.  See the NOTICE file
+// distributed with this work for additional information
+// regarding copyright ownership.  The ASF licenses this file
+// to you under the Apache License, Version 2.0 (the
+// "License"); you may not use this file except in compliance
+// with the License.  You may obtain a copy of the License at
+//
+//   http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing,
+// software distributed under the License is distributed on an
+// "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied.  See the License for the
+// specific language governing permissions and limitations
+// under the License.
+//
+
+import "jvision_top.proto";
+
+message GLogicalPort {
+    repeated LogicalInterfaceInfo interface_info = 1;
+}
+            
+message LogicalInterfaceInfo {
+    // interface name e.g., xe-0/0/0.0 
+    required string if_name = 1 [(telemetry_options).is_key = true];
+
+    // time reset
+    required uint64 init_time = 2 [(telemetry_options).is_timestamp = true];
+
+    // Global Index
+    optional uint32 snmp_if_index = 3 [(telemetry_options).is_key = true];
+
+    // Name of the AE Parent
+    optional string parent_ae_name = 4 [(telemetry_options).is_key = true];
+
+    // Inbound traffic stats
+    optional IngressInterfaceStats ingress_stats = 5;
+
+    // Outbound traffic stats
+    optional EgressInterfaceStats egress_stats = 6;
+
+    // up/down etc
+    optional OperationalState op_state = 7; 
+}
+
+/*
+ *  Received Statistics on the interface
+ */
+message IngressInterfaceStats {
+    // Count of packets
+    required uint64 if_pkts = 1 [(telemetry_options).is_counter = true];
+
+    // Count of bytes  
+    required uint64 if_octets = 2 [(telemetry_options).is_counter = true]; 
+
+    // Count of unicast packets
+    optional uint64 if_ucast_pkts = 3 [(telemetry_options).is_counter = true];
+
+    // Count of multicast packets
+    required uint64 if_mcast_pkts = 4 [(telemetry_options).is_counter = true];
+
+    repeated ForwardingClassAccounting if_fc_stats = 5;
+}
+
+/*
+ *  Transmitted Statistics on the interface
+ */
+message EgressInterfaceStats {
+    // Count of packets
+    required uint64 if_pkts = 1 [(telemetry_options).is_counter = true];
+    // Count of bytes
+    required uint64 if_octets = 2 [(telemetry_options).is_counter = true];
+}
+
+/*
+ *  Operational State Details
+ */
+message OperationalState {
+    // If the link is up/down
+    optional string operational_status = 1;
+}
+
+/*
+ *  Counters Per Forwarding Class
+ */
+message ForwardingClassAccounting {
+    // The interface protocol
+    optional string if_family = 1 [(telemetry_options).is_key = true];
+
+    // Forwarding class number
+    optional uint32 fc_number = 2 [(telemetry_options).is_key = true];
+
+    // Count of packets
+    optional uint64 if_pkts = 3 [(telemetry_options).is_counter = true];
+
+    // Count of bytes
+    optional uint64 if_octets = 4 [(telemetry_options).is_counter = true];
+
+}
+
+
+//
+// this occupies branch 7 from JuniperNetworksSensors
+//
+extend JuniperNetworksSensors {
+    optional GLogicalPort jnprLogicalInterfaceExt = 7;
+}
+
