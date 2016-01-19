@@ -23,8 +23,6 @@ module Fluent
             # it is a single syslog message.
             def parse(text)
 
-                puts "Inside juniper_jvision"
-
                 jvision_msg =  TelemetryStream.decode(text)
 
                 ## Extract device name and cleanup
