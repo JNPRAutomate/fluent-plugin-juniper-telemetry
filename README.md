@@ -20,15 +20,15 @@ rake install
 
 This plugin include 3 parsers, one for each type of Juniper Devics data streaming type.
 
-**jvision**
+**jvision**  
 Supported devices : MX (add version info)
 `format juniper_jvision`
 
-**analyticsd**
+**analyticsd**  
 Supported devices : EX4300 & QFX5100 (add version info)
 `format juniper_analyticsd`
 
-**network agent**
+**network agent**  
 Supported devices :  
 `format juniper_na`
 
@@ -40,7 +40,7 @@ Supported devices :
 
 `output_format`: The format of the date send to the output plugin : structured*, statsd, flat
 
-**structured**
+**structured**  
 
 All information are in key/value pair, the list of keys depend of the type of data send.
 ```
@@ -94,14 +94,35 @@ All information are in key/value pair, the list of keys depend of the type of da
     bind 0.0.0.0
 </source>
 ```
+Full configuration example is available [here](https://github.com/JNPRAutomate/fluent-plugin-juniper-telemetry/blob/master/fluentd/fluent.conf)  
 
-## Build ruby library based on proto files
+## Docker container for test & development
+
+The project include a docker container for test and  development.
+The container is preconfigured with fluentd for all plugins.  
+Configuration file is available [here](https://github.com/JNPRAutomate/fluent-plugin-juniper-telemetry/blob/master/fluentd/fluent.conf)  
+
+By default, everything is going to stdout in /var/log/fluentd.log
+
+You first need to build the container
+```
+docker build -t fluent-plugin-juniper-telemetry .
+```
+
+And then you can launch it
+```
+docker run --rm -t -i fluent-plugin-juniper-telemetry /sbin/my_init -- bash -l
+```
+
+There are 2 scripts provided : **build** and **debug**, to simplify these steps.
+
+### Build ruby library based on proto files
 
 The container has all tools needed to generate ruby library from proto files.  
 It's possible to regenerate all ruby files by executing the command below.  
 
 It will mount the project under the directory /gpb inside the container and compile all files
-Newly created /rb will be stored under lib/
+Newly created .rb will be stored under lib/
 
 ```
 docker run --rm -t -v $(pwd):/gpb -i fluent-plugin-juniper-telemetry /bin/sh /root/compile_protofile.sh
