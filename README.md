@@ -20,17 +20,15 @@ rake install
 
 This plugin include 3 parsers, one for each type of Juniper Devics data streaming type.
 
-
-jvision:
+**jvision**
 Supported devices : MX (add version info)
 `format juniper_jvision`
 
-analyticsd:
+**analyticsd**
 Supported devices : EX4300 & QFX5100 (add version info)
 `format juniper_analyticsd`
 
-
-network agent:
+**network agent**
 Supported devices :  
 `format juniper_na`
 
