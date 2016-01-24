@@ -20,9 +20,9 @@ rake install
 
 This plugin include 3 parsers, one for each type of Juniper Devics data streaming type.
 
-**jvision**  
+**Juniper Telemetry Interface (jvision)**  
 Supported devices : MX (add version info)
-`format juniper_jvision`
+`format juniper_jti`
 
 **analyticsd**  
 Supported devices : EX4300 & QFX5100 (add version info)
@@ -38,28 +38,43 @@ Supported devices :
 
 ## Options
 
-`output_format`: The format of the date send to the output plugin : structured*, statsd, flat
+`output_format`: The format of the data send to the output plugin : structured*, statsd, flat
 
 **structured**  
 
 All information are in key/value pair, the list of keys depend of the type of data send.
 ```
 {
-  "device":"WFD-QFX5100-48T-1",
-  "type":"traffic-stats.txmcpkt",  
-  "interface":"xe-0_0_3",  
-  "value":838
+    "device":"WFD-QFX5100-48T-1",
+    "type":"traffic-stats.txmcpkt",  
+    "interface":"xe-0_0_3",  
+    "value":838
 }
 ```
 
+> Format "structured" is compatible with output_plugin for influxdb
+
 **flat**
 ```
+{
+    "device.wfd-qfx5100-48t-2.interface.xe-0_0_1.queue.latency" : 3231155
+}
 ```
+
+> Format "flat" is compatible with output_plugin for graphite
 
 **Statsd**
 
 ```
+{
+    "statsd_type" : "gauge",
+    "statsd_key" : "interface.et-0_0_52.type.txucpkt",
+    "statsd_gauge" : 37673515243
+}
 ```
+
+> Format "statsd" is compatible with output_plugin for statsd
+
 
 ### Configuration Example
 
@@ -67,9 +82,8 @@ All information are in key/value pair, the list of keys depend of the type of da
 <source>
     @type udp
     tag jnpr.statsd
-    format juniper_analyticsd
-    output_format statsd
-    port 51020
+    format juniper_jti
+    port 40000
     bind 0.0.0.0
 </source>
 ```
@@ -79,7 +93,7 @@ All information are in key/value pair, the list of keys depend of the type of da
     @type udp
     tag jnpr.statsd
     format juniper_analyticsd
-    port 51020
+    port 40020
     bind 0.0.0.0
 </source>
 ```
@@ -90,7 +104,7 @@ All information are in key/value pair, the list of keys depend of the type of da
     tag jnpr.statsd
     format juniper_na
     output_format flat
-    port 51020
+    port 40010
     bind 0.0.0.0
 </source>
 ```
