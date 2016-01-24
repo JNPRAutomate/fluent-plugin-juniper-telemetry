@@ -5,14 +5,19 @@ module Fluent
             Plugin.register_parser("juniper_na", self)
 
             config_param :output_format, :string, :default => 'structured'
-            config_param :time_format, :string, :default => nil
 
             # This method is called after config_params have read configuration parameters
             def configure(conf)
                 super
-                @time_parser = TimeParser.new(@time_format)
-            end
 
+                ## Check if "output_format" has a valid value
+                unless  @output_format.to_s == "structured" ||
+                        @output_format.to_s == "flat" ||
+                        @output_format.to_s == "statsd"
+
+                    raise ConfigError, "output_format value '#{@output_format}' is not valid. Must be : structured, flat or statsd"
+                end
+            end
             # This is the main method. The input "text" is the unit of data to be parsed.
             # If this is the in_tail plugin, it would be a line. If this is for in_syslog,
             # it is a single syslog message.

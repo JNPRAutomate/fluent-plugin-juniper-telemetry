@@ -4,15 +4,21 @@ module Fluent
 
             Plugin.register_parser("juniper_analyticsd", self)
 
-            config_param :time_format, :string, :default => nil
             config_param :output_format, :string, :default => 'structured'
 
             # This method is called after config_params have read configuration parameters
             def configure(conf)
                 super
-                @time_parser = TimeParser.new(@time_format)
-            end
 
+                ## Check if "output_format" has a valid value
+                unless  @output_format.to_s == "structured" ||
+                        @output_format.to_s == "flat" ||
+                        @output_format.to_s == "statsd"
+
+                    raise ConfigError, "output_format value '#{@output_format}' is not valid. Must be : structured, flat or statsd"
+                end
+            end
+            
             def parse(text)
 
                 payload = JSON.parse(text)
