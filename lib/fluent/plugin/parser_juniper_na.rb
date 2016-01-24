@@ -32,14 +32,16 @@ module Fluent
 
                         name_h = Hash.new
                         type = ''
-                        if output_format.to_s == 'flat'
+                        if output_format.to_s == 'flat' ||
+                            output_format.to_s == 'statsd'
                             name_gr = name_flat(name)
 
                         elsif output_format.to_s == 'structured'
                             name_h = name_hash(name)
                             type = name_h['type']
+
                         else
-                            puts "output_format not supported"
+                            $log.warn "Output_format '#{output_format.to_s}' not supported."
                         end
 
                         ##
@@ -55,7 +57,7 @@ module Fluent
 
                                     record = {}
                                     if output_format.to_s == 'flat'
-                                        full_name = name_gr + "." + sub_type
+                                        full_name = "#{name_gr}.#{sub_type}"
                                         record[full_name.downcase]= value2
 
                                     elsif output_format.to_s == 'structured'
@@ -64,10 +66,12 @@ module Fluent
                                         record.merge!(name_h)
 
                                     elsif output_format.to_s == 'statsd'
-                                        full_name = name_gr + "." + sub_type
+                                        full_name = "#{name_gr}.#{sub_type}"
                                         record[:statsd_type] = 'gauge'
                                         record[:statsd_key] = full_name.downcase
                                         record[:statsd_gauge] = value2
+                                    else
+                                        $log.warn "Output_format '#{output_format.to_s}' not supported for #{sub_type}"
                                     end
 
                                     yield time, record
@@ -77,7 +81,7 @@ module Fluent
                                 sub_type = key
 
                                 if output_format.to_s == 'flat'
-                                    full_name = name_gr + "." + sub_type
+                                    full_name = "#{name_gr}.#{sub_type}"
                                     record[full_name.downcase]= value
 
                                 elsif output_format.to_s == 'structured'
@@ -86,10 +90,12 @@ module Fluent
                                     record.merge!(name_h)
 
                                 elsif output_format.to_s == 'statsd'
-                                      full_name = name_gr + "." + sub_type
-                                      record[:statsd_type] = 'gauge'
-                                      record[:statsd_key] = full_name.downcase
-                                      record[:statsd_gauge] = value
+                                    full_name = "#{name_gr}.#{sub_type}"
+                                    record[:statsd_type] = 'gauge'
+                                    record[:statsd_key] = full_name.downcase
+                                    record[:statsd_gauge] = value
+                                else
+                                    $log.warn "Output_format '#{output_format.to_s}' not supported for #{sub_type}"
                                 end
 
                                 yield time, record
