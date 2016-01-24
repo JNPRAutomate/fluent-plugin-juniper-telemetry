@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |s|
   s.name          = "fluent-plugin-juniper-telemetry"
-  s.version       = '0.2.0'
+  s.version       = '0.2.5'
   s.authors       = ["Damien Garros"]
   s.email         = ["dgarros@gmail.com"]
 
@@ -19,5 +19,6 @@ Gem::Specification.new do |s|
   s.require_paths = %w(lib)
 
   s.add_runtime_dependency "fluentd", ">= 0.10.58"
+  s.add_runtime_dependency "protobuf"
   s.add_development_dependency "rake"
 end
