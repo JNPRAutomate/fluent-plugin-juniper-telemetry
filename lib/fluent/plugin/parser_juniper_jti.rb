@@ -27,11 +27,12 @@ module Fluent
 
                 jvision_msg =  TelemetryStream.decode(text)
 
-                time = Engine.now
+
                 resource = ""
 
-                ## Extract device name and cleanup
+                ## Extract device name & Timestamp
                 device_name = jvision_msg.system_id
+                gpb_time = jvision_msg.timestamp
 
                 ## Extract sensor
                 jnpr_sensor = jvision_msg.enterprise.juniperNetworks
@@ -51,7 +52,6 @@ module Fluent
 
                             ## Extract interface name and clean up
                             interface_name = datas['if_name']
-                            init_time = datas['init_time']
 
                             ## Clean up Current object
                             datas.delete("if_name")
@@ -86,7 +86,7 @@ module Fluent
                                                 $log.warn "Output_format '#{output_format.to_s}' not supported for resource : #{resource}"
                                             end
 
-                                            yield time, record
+                                            yield gpb_time, record
                                         end
                                     end
                                 else
@@ -107,7 +107,7 @@ module Fluent
                                             $log.warn "Output_format '#{output_format.to_s}' not supported for resource : #{resource}"
                                         end
 
-                                        yield time, record
+                                        yield gpb_time, record
                                     end
                                 end
                             end
