@@ -30,6 +30,10 @@ module Fluent
                 device_name = payload["router-id"]
                 port_name = payload["port"]
 
+                ## Record time is in microsecond and until 0.14 Fluentd do not support lower than 1s
+                ## We need to trim record time for now to fit fluentd
+                json_time = (record_time/1000000).to_i
+
                 if record_type == 'traffic-stats'
 
                     ## Delete contextual info
@@ -62,7 +66,7 @@ module Fluent
                             $log.warn "Output_format '#{output_format.to_s}' not supported for #{record_type}"
                         end
 
-                        yield time, record
+                        yield json_time, record
                     end
                 elsif record_type == 'queue-stats'
 
@@ -97,7 +101,7 @@ module Fluent
                             $log.warn "Output_format '#{output_format.to_s}' not supported for #{record_type}"
                         end
 
-                        yield time, record
+                        yield json_time, record
                     end
                 else
                     $log.warn "Recard type '#{record_type}' not supported"
