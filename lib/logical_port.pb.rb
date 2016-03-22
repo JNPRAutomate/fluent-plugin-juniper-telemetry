@@ -15,7 +15,7 @@ require 'jvision_top.pb'
 ##
 # Message Classes
 #
-class GLogicalPort < ::Protobuf::Message; end
+class LogicalPort < ::Protobuf::Message; end
 class LogicalInterfaceInfo < ::Protobuf::Message; end
 class IngressInterfaceStats < ::Protobuf::Message; end
 class EgressInterfaceStats < ::Protobuf::Message; end
@@ -26,7 +26,7 @@ class ForwardingClassAccounting < ::Protobuf::Message; end
 ##
 # Message Fields
 #
-class GLogicalPort
+class LogicalPort
   repeated ::LogicalInterfaceInfo, :interface_info, 1
 end
 
@@ -41,15 +41,15 @@ class LogicalInterfaceInfo
 end
 
 class IngressInterfaceStats
-  required :uint64, :if_pkts, 1
+  required :uint64, :if_packets, 1
   required :uint64, :if_octets, 2
-  optional :uint64, :if_ucast_pkts, 3
-  required :uint64, :if_mcast_pkts, 4
+  optional :uint64, :if_ucast_packets, 3
+  required :uint64, :if_mcast_packets, 4
   repeated ::ForwardingClassAccounting, :if_fc_stats, 5
 end
 
 class EgressInterfaceStats
-  required :uint64, :if_pkts, 1
+  required :uint64, :if_packets, 1
   required :uint64, :if_octets, 2
 end
 
@@ -60,7 +60,7 @@ end
 class ForwardingClassAccounting
   optional :string, :if_family, 1
   optional :uint32, :fc_number, 2
-  optional :uint64, :if_pkts, 3
+  optional :uint64, :if_packets, 3
   optional :uint64, :if_octets, 4
 end
 
@@ -69,6 +69,6 @@ end
 # Extended Message Fields
 #
 class ::JuniperNetworksSensors < ::Protobuf::Message
-  optional ::GLogicalPort, :jnprLogicalInterfaceExt, 7, :extension => true
+  optional ::LogicalPort, :jnprLogicalInterfaceExt, 7, :extension => true
 end
 

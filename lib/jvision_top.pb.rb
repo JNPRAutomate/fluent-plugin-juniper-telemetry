@@ -16,10 +16,10 @@ require 'google/protobuf/descriptor.pb'
 # Message Classes
 #
 class TelemetryFieldOptions < ::Protobuf::Message; end
-class JuniperNetworksSensors < ::Protobuf::Message; end
-class EnterpriseSensors < ::Protobuf::Message; end
-class IETFSensors < ::Protobuf::Message; end
 class TelemetryStream < ::Protobuf::Message; end
+class IETFSensors < ::Protobuf::Message; end
+class EnterpriseSensors < ::Protobuf::Message; end
+class JuniperNetworksSensors < ::Protobuf::Message; end
 
 
 ##
@@ -32,13 +32,6 @@ class TelemetryFieldOptions
   optional :bool, :is_gauge, 4
 end
 
-class EnterpriseSensors
-  optional ::JuniperNetworksSensors, :juniperNetworks, 2636
-  # Extension Fields
-  extensions 1...2636
-  extensions 2637...536870912
-end
-
 class TelemetryStream
   required :string, :system_id, 1
   optional :uint32, :component_id, 2
@@ -46,6 +39,8 @@ class TelemetryStream
   optional :string, :sensor_name, 4
   optional :uint32, :sequence_number, 5
   optional :uint64, :timestamp, 6
+  optional :uint32, :version_major, 7
+  optional :uint32, :version_minor, 8
   optional ::IETFSensors, :ietf, 100
   optional ::EnterpriseSensors, :enterprise, 101
 end
@@ -56,5 +51,9 @@ end
 #
 class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
   optional ::TelemetryFieldOptions, :telemetry_options, 1024, :extension => true
+end
+
+class ::EnterpriseSensors < ::Protobuf::Message
+  optional ::JuniperNetworksSensors, :juniperNetworks, 2636, :extension => true
 end
 
