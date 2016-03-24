@@ -18,21 +18,17 @@ rake install
 
 ## Usage
 
-This plugin include 3 parsers, one for each type of Juniper Devics data streaming type.
+This plugin include 2 parsers, one for each type of Juniper Devices data streaming type.
 
 **Juniper Telemetry Interface (jvision)**  
-Supported devices : MX (add version info)
+Supported devices : MX (up to 15.1F5)
 `format juniper_jti`
 
 **analyticsd**  
 Supported devices : EX4300 & QFX5100 (add version info)
 `format juniper_analyticsd`
 
-**network agent**  
-Supported devices :  
-`format juniper_na`
-
-> Supported devices are listed as of Jan 2016, please refer to Juniper website for accurate support list
+> Supported devices are listed as of March 2016, please refer to Juniper website for accurate support list
 
 --------------
 
@@ -98,16 +94,6 @@ All information are in key/value pair, the list of keys depend of the type of da
 </source>
 ```
 
-```
-<source>
-    @type udp
-    tag jnpr.statsd
-    format juniper_na
-    output_format flat
-    port 40010
-    bind 0.0.0.0
-</source>
-```
 Full configuration example is available [here](https://github.com/JNPRAutomate/fluent-plugin-juniper-telemetry/blob/master/fluentd/fluent.conf)  
 
 ## Docker container for test & development
@@ -128,7 +114,7 @@ And then you can launch it
 docker run --rm -t -i fluent-plugin-juniper-telemetry /sbin/my_init -- bash -l
 ```
 
-There are 2 scripts provided : **build** and **debug**, to simplify these steps.
+There are 2 scripts provided : **docker.build.sh** and **docker.debug.sh**, to simplify these steps.
 
 ### Build ruby library based on proto files
 
@@ -151,7 +137,7 @@ In order to be able to send these files to any container, we need to change the 
 In a docker environment, it's possible to use the broadcast address of the internal network 172.17/16 and a generic mac address.  
 See instruction below on how to update these information
 
-Replay a capture (while beeing in the packet_examples directory)
+Replay a capture (while being in the packet_examples directory)
 ```
 docker run --rm -t -v $(pwd):/data -i dgarros/tcpreplay /usr/bin/tcpreplay --intf1=eth0 --pps=100 jvision_phy_int.pcap
 ```
