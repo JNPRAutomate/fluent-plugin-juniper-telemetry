@@ -1,6 +1,6 @@
 
 
-# Jvision
+# Juniper Telemetry Interface (jvision)
 
 ## int-phy
 
@@ -155,10 +155,6 @@ Content inside sensor
     }
 }
 ```
-
-
-# Network Agent
-
 
 # Analyticsd
 
