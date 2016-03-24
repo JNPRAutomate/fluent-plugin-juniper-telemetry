@@ -1,4 +1,4 @@
-FROM phusion/baseimage:0.9.17
+FROM phusion/baseimage:0.9.18
 MAINTAINER Damien Garros <dgarros@gmail.com>
 
 RUN     apt-get -y update && \
@@ -12,7 +12,6 @@ RUN     apt-get -y --force-yes install \
 ## Enable SSH
 RUN     rm -f /etc/service/sshd/down
 RUN     /usr/sbin/enable_insecure_key
-
 
 #####################################
 ### Install google protocol buffer ##
@@ -29,7 +28,7 @@ RUN     chmod +x /root/compile_protofile.sh
 ########################
 
 RUN     gem install fluentd rake bundler --no-ri --no-rdoc
-RUN     mkdir /root/fluentd-plugin-juniper-telemetry
+RUN     gem install fluent-plugin-file-sprintf
 
 ADD     fluentd/fluent.conf /fluent/fluent.conf
 RUN     fluentd --setup ./fluent
@@ -37,23 +36,29 @@ RUN     fluentd --setup ./fluent
 ADD     fluentd/fluentd.launcher.sh /etc/service/fluentd/run
 RUN     chmod +x /etc/service/fluentd/run
 
-###################################
-### copy plugin files           ###
-###################################
+ADD     fluentd/showlog.sh /root/showlog.sh
+RUN     chmod +x /root/showlog.sh
 
-WORKDIR "/root/fluentd-plugin-juniper-telemetry"
+######################################################
+### Create directory to mount local file           ###
+######################################################
 
-ADD     lib /root/fluentd-plugin-juniper-telemetry/lib
-ADD     junos-telemetry /root/fluentd-plugin-juniper-telemetry/junos-telemetry
+RUN     mkdir /root/fluentd-plugin-juniper-telemetry
+ENV     RUBYLIB   /root/fluentd-plugin-juniper-telemetry/lib
 
-ADD     Gemfile Gemfile
-ADD     Rakefile Rakefile
-ADD     fluent-plugin-juniper-telemetry.gemspec fluent-plugin-juniper-telemetry.gemspec
+# WORKDIR "/root/fluentd-plugin-juniper-telemetry"
+#
+# ADD     lib /root/fluentd-plugin-juniper-telemetry/lib
+# ADD     junos-telemetry /root/fluentd-plugin-juniper-telemetry/junos-telemetry
+#
+# ADD     Gemfile Gemfile
+# ADD     Rakefile Rakefile
+# ADD     fluent-plugin-juniper-telemetry.gemspec fluent-plugin-juniper-telemetry.gemspec
+#
+# RUN     rake install
 
-RUN     rake install
-
-# RUN     apt-get clean && \
-#         rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+RUN     apt-get clean && \
+        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
 
 ENV HOME /root
 RUN chmod -R 777 /var/log/
