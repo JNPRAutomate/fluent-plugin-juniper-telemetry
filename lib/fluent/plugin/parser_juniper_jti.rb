@@ -114,30 +114,30 @@ module Fluent
                         end
 
                       end
-                    elsif sensor == "jnpr_firewall_ext"
-
-                      resource = "/junos/system/xxx"
-
-                      datas_sensors[sensor]['firewall_stats'].each do |datas|
-
-                        begin
-                          ## Extract interface name and clean up
-                          sensor_data.push({ 'device' => device_name  })
-                          sensor_data.push({ 'filter_name' => datas['filter_name']  })
-
-                          ## Clean up Current object
-                          # datas.delete("filter_name")
-
-                          $log.warn  "Sensor Filter : " + datas['filter_name']
-
-                        rescue
-                          $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
-                          $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
-                        end
-                      end
+                    # elsif sensor == "jnpr_firewall_ext"
+                    #
+                    #   resource = "/junos/system/xxx"
+                    #
+                    #   datas_sensors[sensor]['firewall_stats'].each do |datas|
+                    #
+                    #     begin
+                    #       ## Extract interface name and clean up
+                    #       sensor_data.push({ 'device' => device_name  })
+                    #       sensor_data.push({ 'filter_name' => datas['filter_name']  })
+                    #
+                    #       ## Clean up Current object
+                    #       # datas.delete("filter_name")
+                    #
+                    #       $log.warn  "Sensor Filter : " + datas['filter_name']
+                    #
+                    #     rescue
+                    #       $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
+                    #       $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
+                    #     end
+                    #   end
                     elsif sensor == "jnprLogicalInterfaceExt"
 
-                      resource = "/junos/system/xxx"
+                      resource = "/junos/system/linecard/interface/logical/usage"
 
                       datas_sensors[sensor]['interface_info'].each do |datas|
 
