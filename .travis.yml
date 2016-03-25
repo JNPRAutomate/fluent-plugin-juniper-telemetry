@@ -13,4 +13,4 @@ install:
   - docker build -t fluent-plugin-juniper-telemetry .
 
 script:
-  - python -m pytest -v --durations=10
+  - python -m pytest -v --durations=5
