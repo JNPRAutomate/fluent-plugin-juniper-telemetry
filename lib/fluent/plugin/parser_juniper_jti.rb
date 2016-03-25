@@ -50,9 +50,6 @@ module Fluent
                 ## Go over each Sensor
                 datas_sensors.each do |sensor, s_data|
 
-                    # Save all info extracted on a list
-                    sensor_data = []
-
                     ##############################################################
                     ### Support for resource /junos/system/linecard/interface/  ##
                     ##############################################################
@@ -61,6 +58,9 @@ module Fluent
                       resource = "/junos/system/linecard/interface/"
 
                       datas_sensors[sensor]['interface_stats'].each do |datas|
+
+                        # Save all info extracted on a list
+                        sensor_data = []
 
                         # Catch Exception during parsing
                         begin
@@ -86,24 +86,31 @@ module Fluent
                             if data.kind_of?(Array)
                               data.each do |queue|
 
+                                ## Create local copy to avoid variable sharing
+                                local_sensor_data = sensor_data.dup
+
                                 ## Save and Cleanup Queue number
-                                sensor_data.push({ 'egress_queue' => queue['queue_number']  })
+                                local_sensor_data.push({ 'egress_queue' => queue['queue_number']  })
                                 queue.delete("queue_number")
 
                                 queue.each do |type,value|
-                                  sensor_data.push({ 'type' => section + '.' + type  })
-                                  sensor_data.push({ 'value' => value  })
+                                  local_sensor_data.push({ 'type' => section + '.' + type  })
+                                  local_sensor_data.push({ 'value' => value  })
 
-                                  record = build_record(output_format, sensor_data)
+                                  record = build_record(output_format, local_sensor_data)
                                   yield gpb_time, record
                                 end
                               end
                             else
                               data.each do |type,value|
-                                sensor_data.push({ 'type' => section + '.' + type  })
-                                sensor_data.push({ 'value' => value  })
 
-                                record = build_record(output_format, sensor_data)
+                                ## Create local copy to avoid using some variable
+                                local_sensor_data = sensor_data.dup
+
+                                local_sensor_data.push({ 'type' => section + '.' + type  })
+                                local_sensor_data.push({ 'value' => value  })
+
+                                record = build_record(output_format, local_sensor_data)
                                 yield gpb_time, record
                               end
                             end
@@ -112,11 +119,13 @@ module Fluent
                           $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
                           $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
                         end
-
                       end
+                    ##############################################################
+                    ### Support for resource /junos/system/linecard/firewall/  ##
+                    ##############################################################
                     # elsif sensor == "jnpr_firewall_ext"
                     #
-                    #   resource = "/junos/system/xxx"
+                    #   resource = "/junos/system/linecard/firewall"
                     #
                     #   datas_sensors[sensor]['firewall_stats'].each do |datas|
                     #
@@ -135,11 +144,18 @@ module Fluent
                     #       $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
                     #     end
                     #   end
+
+                    ##############################################################
+                    ### Support for resource /junos/system/linecard/interface/logical/usage ##
+                    ##############################################################
                     elsif sensor == "jnprLogicalInterfaceExt"
 
                       resource = "/junos/system/linecard/interface/logical/usage"
 
                       datas_sensors[sensor]['interface_info'].each do |datas|
+
+                        # Save all info extracted on a list
+                        sensor_data = []
 
                         begin
                           ## Extract interface name and clean up
@@ -153,7 +169,6 @@ module Fluent
                           datas.delete("op_state")
 
                           datas.each do |section, data|
-
                             data.each do |type, value|
 
                               sensor_data.push({ 'type' => section + '.' + type  })
@@ -187,7 +202,7 @@ module Fluent
                 return tmp
             end
 
-            def build_record(type, data)
+            def build_record(type, data_to_build)
 
               if type.to_s == 'flat'
 
@@ -196,7 +211,7 @@ module Fluent
                 sensor_value = ""
 
                 ## Concatene all key/value into a string and stop at "value"
-                data.each do |entry|
+                data_to_build.each do |entry|
                   entry.each do |key, value|
 
                     if key == "value"
@@ -214,18 +229,50 @@ module Fluent
 
                 record = { name => sensor_value }
                 return record
-
               elsif output_format.to_s == 'structured'
                 record = {}
                 ## Convert list into Hash
                 ## Each entry on the list is a hash with 1 key/value
-                data.each do |entry|
+                data_to_build.each do |entry|
                   entry.each do |key, value|
                     record[key] = value
                   end
                 end
 
                 return record
+
+              elsif output_format.to_s == 'statsd'
+
+                  record = {}
+
+                  # initialize variables
+                  name = ""
+                  sensor_value = ""
+
+                  ## Concatene all key/value into a string, exclude device & stop at "value"
+                  data_to_build.each do |entry|
+                    entry.each do |key, value|
+
+                      if key == "value"
+                        sensor_value = value
+                        next
+                      elsif key == "device"
+                        next
+                      else
+                        if name == ""
+                          name = key + "." + clean_up_name(value).to_s
+                        else
+                          name = name + "." + key + "." + clean_up_name(value).to_s
+                        end
+                      end
+                    end
+                  end
+
+                  record[:statsd_type] = 'gauge'
+                  record[:statsd_key] = name.downcase
+                  record[:statsd_gauge] = sensor_value
+
+                  return record
               else
                 $log.warn "Output_format '#{type.to_s}' not supported"
               end
