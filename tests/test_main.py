@@ -219,7 +219,7 @@ def teardown_module(module):
     global c
 
     # Delete all files in /tests/output/
-    if not os.getenv('TRAVIS')
+    if not os.getenv('TRAVIS'):
         stop_fluentd()
 
         cleanup_test_output()
