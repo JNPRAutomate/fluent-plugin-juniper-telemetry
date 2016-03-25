@@ -14,7 +14,7 @@ Gem::Specification.new do |s|
   s.license       = 'Apache 2.0'
 
   #s.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^test/}) }
-  s.files         = Dir['lib/fluent/plugin/*.rb', 'lib/*.rb', 'lib/google/protobuf/*.rb' ]
+  s.files         = Dir['lib/fluent/plugin/parser*.rb', 'lib/*.rb', 'lib/google/protobuf/*.rb' ]
   s.test_files    = s.files.grep(%r{^(test|spec|features)/})
   s.require_paths = %w(lib)
 
