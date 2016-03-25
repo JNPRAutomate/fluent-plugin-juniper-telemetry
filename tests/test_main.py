@@ -219,14 +219,14 @@ def teardown_module(module):
     global c
 
     # Delete all files in /tests/output/
+    if not os.getenv('TRAVIS')
+        stop_fluentd()
 
-    stop_fluentd()
+        cleanup_test_output()
 
-    cleanup_test_output()
-    
-    try:
-        old_container_id = c.inspect_container(TCP_RELAY_CONTAINER_NAME)['Id']
-        c.stop(container=old_container_id)
-        c.remove_container(container=old_container_id)
-    except:
-        print "Container do not exit"
+        try:
+            old_container_id = c.inspect_container(TCP_RELAY_CONTAINER_NAME)['Id']
+            c.stop(container=old_container_id)
+            c.remove_container(container=old_container_id)
+        except:
+            print "Container do not exit"

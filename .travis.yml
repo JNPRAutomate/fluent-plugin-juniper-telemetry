@@ -14,3 +14,5 @@ install:
 
 script:
   - python -m pytest -v --durations=5
+  - docker logs fluent-plugin-juniper-telemetry_test
+  - docker logs tcpreplay_test
