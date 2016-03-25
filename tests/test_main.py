@@ -213,7 +213,13 @@ def test_jti_structured_ifd_01():
 
     time.sleep(1)
 
-    assert filecmp.cmp(CURRENT_DIR + '/tests/fixtures/test_jti_structured_ifd_01/' + OUTPUT_FILE, CURRENT_DIR + '/tests/output/' + OUTPUT_FILE)
+    test_results = filecmp.cmp(CURRENT_DIR + '/tests/fixtures/test_jti_structured_ifd_01/' + OUTPUT_FILE, CURRENT_DIR + '/tests/output/' + OUTPUT_FILE)
+
+    if not test_results:
+        with open(CURRENT_DIR + '/tests/output/' + OUTPUT_FILE, 'r') as fin:
+            print fin.read()
+
+    assert test_results
 
 def teardown_module(module):
     global c
