@@ -3,10 +3,9 @@ Fluentd plugin for Juniper telemetry
 
 ## Installation
 
-From gems repository (once available)
+From gems repository
 ```
-= Not yet available =
-fluent-gem install fluent-plugin-juniper-telemetry
+gem install fluent-plugin-juniper-telemetry
 ```
 
 From source
@@ -77,7 +76,7 @@ All information are in key/value pair, the list of keys depend of the type of da
 ```
 <source>
     @type udp
-    tag jnpr.statsd
+    tag jnpr.jti
     format juniper_jti
     port 40000
     bind 0.0.0.0
@@ -87,7 +86,7 @@ All information are in key/value pair, the list of keys depend of the type of da
 ```
 <source>
     @type udp
-    tag jnpr.statsd
+    tag jnpr.analyticsd
     format juniper_analyticsd
     port 40020
     bind 0.0.0.0
