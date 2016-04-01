@@ -40,12 +40,13 @@ module Fluent
                 begin
                   jnpr_sensor = jti_msg.enterprise.juniperNetworks
                   datas_sensors = JSON.parse(jnpr_sensor.to_json)
-                  $log.debug  "Extract sensor data from " + device_name
-                rescue
-                  $log.warn   "Unable to extract sensor data sensor from jti_msg.enterprise.juniperNetworks, something went wrong"
+                  $log.debug  "Extract sensor data from #{device_name} with output #{output_format}"
+                rescue => e
+                  $log.warn   "Unable to extract sensor data sensor from jti_msg.enterprise.juniperNetworks, Error during processing: #{$!}"
                   $log.debug  "Unable to extract sensor data sensor from jti_msg.enterprise.juniperNetworks, Data Dump : " + jti_msg.inspect.to_s
                   return
                 end
+
 
                 ## Go over each Sensor
                 datas_sensors.each do |sensor, s_data|
@@ -87,13 +88,14 @@ module Fluent
                               data.each do |queue|
 
                                 ## Create local copy to avoid variable sharing
-                                local_sensor_data = sensor_data.dup
+                                queue_sensor_data = sensor_data.dup
 
                                 ## Save and Cleanup Queue number
-                                local_sensor_data.push({ 'egress_queue' => queue['queue_number']  })
+                                queue_sensor_data.push({ 'egress_queue' => queue['queue_number']  })
                                 queue.delete("queue_number")
 
                                 queue.each do |type,value|
+                                  local_sensor_data = queue_sensor_data.dup
                                   local_sensor_data.push({ 'type' => section + '.' + type  })
                                   local_sensor_data.push({ 'value' => value  })
 
@@ -115,8 +117,8 @@ module Fluent
                               end
                             end
                           end
-                        rescue
-                          $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
+                        rescue => e
+                          $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
                           $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
                         end
                       end
@@ -179,8 +181,8 @@ module Fluent
 
                             end
                           end
-                        rescue
-                          $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
+                        rescue => e
+                          $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
                           $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
                         end
                       end
@@ -191,9 +193,14 @@ module Fluent
                 end
             end
 
+##############################
+## Supporting functions     ##
+##############################
             def clean_up_name(name)
 
-                tmp = name
+                ## Create a clean copy of Name and convert to string
+                tmp = name.to_s.dup
+
                 ## Clean up device name and interface name to remove restricted caracter
                 tmp.gsub!('/', '_')
                 tmp.gsub!(':', '_')
@@ -205,6 +212,8 @@ module Fluent
             def build_record(type, data_to_build)
 
               if type.to_s == 'flat'
+
+                record = {}
 
                 # initialize variables
                 name = ""
@@ -220,16 +229,18 @@ module Fluent
                     end
 
                     if name == ""
-                      name = key + "." + clean_up_name(value).to_s
+                      name = key + "." + clean_up_name(value)
                     else
-                      name = name + "." + key + "." + clean_up_name(value).to_s
+                      name = name + "." + key + "." + clean_up_name(value)
                     end
                   end
                 end
 
                 record = { name => sensor_value }
                 return record
+
               elsif output_format.to_s == 'structured'
+
                 record = {}
                 ## Convert list into Hash
                 ## Each entry on the list is a hash with 1 key/value
@@ -260,9 +271,9 @@ module Fluent
                         next
                       else
                         if name == ""
-                          name = key + "." + clean_up_name(value).to_s
+                          name = key + "." + clean_up_name(value)
                         else
-                          name = name + "." + key + "." + clean_up_name(value).to_s
+                          name = name + "." + key + "." + clean_up_name(value)
                         end
                       end
                     end
