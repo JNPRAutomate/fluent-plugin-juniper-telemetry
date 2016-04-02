@@ -11,6 +11,7 @@ from sys import platform as _platform
 import time
 import requests
 import filecmp
+import sys
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -22,12 +23,17 @@ IMAGE_NAME = 'fluent-plugin-juniper-telemetry'
 CONTAINER_NAME = 'fluent-plugin-juniper-telemetry_test'
 TCP_RELAY_CONTAINER_NAME = 'tcpreplay_test'
 
+TIMER_AFTER_TRAFFIC=1
+
 # Local ports that will be redirected to the Open NTI
 # Startup will fail if some ports are already in use
 TEST_PORT_JTI = 40000
 
 # Local directories that will be mapped into the container
 CURRENT_DIR = os.getcwd()
+TESTS_DIR   = CURRENT_DIR + "/tests"
+TESTS_FIXTURES_DIR = TESTS_DIR + "/fixtures"
+TESTS_OUTPUT_DIR   = TESTS_DIR + "/output"
 
 OUTPUT_FILE = CURRENT_DIR + "tests/output/fluentd_output.json"
 
@@ -133,7 +139,7 @@ def replay_file(file_name):
 def cleanup_test_output():
 
     import os, shutil
-    folder = CURRENT_DIR + '/tests/output/'
+    folder = TESTS_OUTPUT_DIR + '/'
 
     for the_file in os.listdir(folder):
         file_path = os.path.join(folder, the_file)
@@ -198,25 +204,100 @@ def test_output_module():
 
     replay_file(PCAP_FILE)
 
-    time.sleep(1)
+    time.sleep(TIMER_AFTER_TRAFFIC)
 
-    assert os.path.isfile(CURRENT_DIR + '/tests/output/' + OUTPUT_FILE )
+    assert os.path.isfile( TESTS_DIR + '/output/' + OUTPUT_FILE )
 
 def test_jti_structured_ifd_01():
-
     CONFIG_FILE = 'fluent_structured.conf'
-    OUTPUT_FILE = 'test_jti_structured_ifd_01.json'
-    PCAP_FILE   = 'test_jti_structured_ifd_01/jti.pcap'
+
+    FNAME       = sys._getframe().f_code.co_name
+    OUTPUT_FILE = FNAME + ".json"
+    PCAP_FILE   = FNAME + "/jti.pcap"
 
     start_fluentd(CONFIG_FILE, OUTPUT_FILE)
     replay_file(PCAP_FILE)
 
-    time.sleep(1)
+    time.sleep(TIMER_AFTER_TRAFFIC)
 
-    test_results = filecmp.cmp(CURRENT_DIR + '/tests/fixtures/test_jti_structured_ifd_01/' + OUTPUT_FILE, CURRENT_DIR + '/tests/output/' + OUTPUT_FILE)
+    test_results = filecmp.cmp(
+        TESTS_FIXTURES_DIR + '/' + FNAME + '/' + OUTPUT_FILE,
+        TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE,
+        shallow=False)
 
     if not test_results:
-        with open(CURRENT_DIR + '/tests/output/' + OUTPUT_FILE, 'r') as fin:
+        with open(TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE, 'r') as fin:
+            print fin.read()
+
+    assert test_results
+
+def test_jti_statsd_ifd_01():
+    CONFIG_FILE = 'fluent_statsd.conf'
+
+    FNAME       = sys._getframe().f_code.co_name
+    OUTPUT_FILE = FNAME + ".json"
+    PCAP_FILE   = FNAME + "/jti.pcap"
+
+    start_fluentd(CONFIG_FILE, OUTPUT_FILE)
+    replay_file(PCAP_FILE)
+
+    time.sleep(TIMER_AFTER_TRAFFIC)
+
+    test_results = filecmp.cmp(
+        TESTS_FIXTURES_DIR + '/' + FNAME +  '/' + OUTPUT_FILE,
+        TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE,
+        shallow=False)
+
+    if not test_results:
+        with open(TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE, 'r') as fin:
+            print fin.read()
+
+    assert test_results
+
+def test_analyticsd_structured_ifd_01():
+    CONFIG_FILE = 'fluent_structured.conf'
+
+    FNAME       = sys._getframe().f_code.co_name
+    OUTPUT_FILE = FNAME + ".json"
+    PCAP_FILE   = FNAME + "/analyticsd_ifd.pcap"
+
+    start_fluentd(CONFIG_FILE, OUTPUT_FILE)
+    replay_file(PCAP_FILE)
+
+    time.sleep(TIMER_AFTER_TRAFFIC)
+
+    test_results = filecmp.cmp(
+        TESTS_FIXTURES_DIR + '/' + FNAME +  '/' + OUTPUT_FILE,
+        TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE,
+        shallow=False)
+
+    if not test_results:
+        with open(TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE, 'r') as fin:
+            print fin.read()
+
+    assert test_results
+
+def test_analyticsd_structured_queue_01():
+    CONFIG_FILE = 'fluent_structured.conf'
+
+    FNAME       = sys._getframe().f_code.co_name
+    OUTPUT_FILE = FNAME + ".json"
+    PCAP_FILE   = FNAME + "/analyticsd_queue.pcap"
+
+    start_fluentd(CONFIG_FILE, OUTPUT_FILE)
+    replay_file(PCAP_FILE)
+
+    time.sleep(TIMER_AFTER_TRAFFIC)
+
+    test_results = filecmp.cmp(
+        TESTS_FIXTURES_DIR + '/' + FNAME +  '/' + OUTPUT_FILE,
+        TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE,
+        shallow=False)
+
+
+
+    if not test_results:
+        with open(TESTS_OUTPUT_DIR + '/' + OUTPUT_FILE, 'r') as fin:
             print fin.read()
 
     assert test_results
