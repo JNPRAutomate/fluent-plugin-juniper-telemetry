@@ -1,3 +1,5 @@
+require 'juniper_telemetry_lib.rb'
+
 module Fluent
     class TextParser
         class JuniperAnalyticsdParser < Parser
@@ -106,19 +108,6 @@ module Fluent
                 else
                     $log.warn "Recard type '#{record_type}' not supported"
                 end
-            end
-
-            ## Clean up device name and interface name to remove restricted caracter
-            ## Used for flat and statsd format
-            def clean_up_name(name)
-
-                tmp = name
-
-                tmp.gsub!('/', '_')
-                tmp.gsub!(':', '_')
-                tmp.gsub!('.', '_')
-
-                return tmp.to_s
             end
         end
     end
