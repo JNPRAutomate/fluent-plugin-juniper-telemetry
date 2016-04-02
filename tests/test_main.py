@@ -25,6 +25,9 @@ TCP_RELAY_CONTAINER_NAME = 'tcpreplay_test'
 
 TIMER_AFTER_TRAFFIC=1
 
+if os.getenv('TRAVIS'):
+  TIMER_AFTER_TRAFFIC=3
+
 # Local ports that will be redirected to the Open NTI
 # Startup will fail if some ports are already in use
 TEST_PORT_JTI = 40000
