@@ -3,6 +3,7 @@ import docker.tls as tls
 import time
 from os import path
 import os
+import shutil
 import pprint
 import subprocess
 import json
@@ -12,6 +13,7 @@ import time
 import requests
 import filecmp
 import sys
+
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -139,19 +141,6 @@ def replay_file(file_name):
     )
     c.start(container)
 
-def cleanup_test_output():
-
-    import os, shutil
-    folder = TESTS_OUTPUT_DIR + '/'
-
-    for the_file in os.listdir(folder):
-        file_path = os.path.join(folder, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-            #elif os.path.isdir(file_path): shutil.rmtree(file_path)
-        except Exception, e:
-            print e
 
 ################################################################################
 ################################################################################
@@ -320,3 +309,22 @@ def teardown_module(module):
             c.remove_container(container=old_container_id)
         except:
             print "Container do not exit"
+
+#############################################
+#############################################
+def cleanup_test_output():
+
+    folder = TESTS_OUTPUT_DIR + '/'
+
+    for the_file in os.listdir(folder):
+
+        if the_file == '.gitignore':
+            continue
+
+        file_path = os.path.join(folder, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+            #elif os.path.isdir(file_path): shutil.rmtree(file_path)
+        except Exception, e:
+            print e
