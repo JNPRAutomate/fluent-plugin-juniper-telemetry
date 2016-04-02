@@ -1,2 +1,2 @@
-{"device":"WFD-QFX5100-48T-2","type":"queue-stats.latency","interface":"xe-0/0/0","value":166}
-{"device":"WFD-QFX5100-48T-2","type":"queue-stats.queue-depth","interface":"xe-0/0/0","value":208}
+{"device":"WFD-QFX5100-48T-2","interface":"xe-0/0/0","type":"queue-stats.latency","value":166}
+{"device":"WFD-QFX5100-48T-2","interface":"xe-0/0/0","type":"queue-stats.queue-depth","value":208}
