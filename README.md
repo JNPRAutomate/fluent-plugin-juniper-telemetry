@@ -146,6 +146,16 @@ Rewrite destination Mac and IP addresses
 docker run --rm -t -v $(pwd):/data -i dgarros/tcpreplay /usr/bin/tcprewrite --infile=jvision_phy_int.pcap --outfile=jvision_phy_int_fixed.pcap --dstipmap=10.92.71.225:172.17.255.255 --enet-dmac=01:00:05:11:00:06 --fixcsum
 ```
 
+## Build gem
+
+Inside the container
+
+```
+cd /root/fluentd-plugin-juniper-telemetry
+gem build fluent-plugin-juniper-telemetry.gemspec
+gem push fluent-plugin-juniper-telemetry-XXX.gem
+```
+
 ## Contributing
 
 1. Fork it
