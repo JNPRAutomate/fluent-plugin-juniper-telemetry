@@ -14,7 +14,8 @@ def epoc_to_sec(epoc)
     return (epoc.to_i/1000).to_i
   elsif nbr_digit == 16
     return (epoc.to_i/1000000).to_i
-
+  end
+  
   return epoc
 end
 
