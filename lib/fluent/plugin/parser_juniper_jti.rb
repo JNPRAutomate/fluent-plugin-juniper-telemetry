@@ -35,7 +35,7 @@ module Fluent
 
         ## Extract device name & Timestamp
         device_name = jti_msg.system_id
-        gpb_time = jti_msg.timestamp
+        gpb_time = epoc_to_sec(jti_msg.timestamp)
 
         ## Extract sensor
         begin
