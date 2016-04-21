@@ -46,6 +46,8 @@ RUN     chmod +x /root/showlog.sh
 RUN     mkdir /root/fluentd-plugin-juniper-telemetry
 ENV     RUBYLIB   /root/fluentd-plugin-juniper-telemetry/lib
 
+WORKDIR "/root"
+
 # WORKDIR "/root/fluentd-plugin-juniper-telemetry"
 #
 # ADD     lib /root/fluentd-plugin-juniper-telemetry/lib
