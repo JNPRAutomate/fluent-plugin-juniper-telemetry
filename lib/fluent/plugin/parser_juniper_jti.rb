@@ -2,6 +2,7 @@ require 'juniper_telemetry_lib.rb'
 require 'protobuf'
 require 'jvision_top.pb.rb'
 require 'port.pb.rb'
+require 'lsp_stats.pb.rb'
 require 'logical_port.pb.rb'
 require 'firewall.pb.rb'
 
@@ -146,6 +147,47 @@ module Fluent
             #       $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
             #     end
             #   end
+            #####################################################################
+            ### Support for resource /junos/services/label-switched-path/usage/##
+            #####################################################################
+            #datas Dump : {"name"=>"to_mx104-9", "instance_identifier"=>0,
+            #  "counter_name"=>"c-25", "packets"=>2521648779, "bytes"=>2526692076558,
+            #  "packet_rate"=>598640, "byte_rate"=>599837511}
+            elsif sensor == "jnpr_lsp_statistics_ext"
+
+              resource = "/junos/services/label-switched-path/usage/"
+
+              datas_sensors[sensor]['lsp_stats_records'].each do |datas|
+
+              # Save all info extracted on a list
+              sensor_data = []
+
+              begin
+                ## Extract interface name and clean up
+                sensor_data.push({ 'device' => device_name  })
+                sensor_data.push({ 'lspname' => datas['name']  })
+                sensor_data.push({ 'instance_identifier' => datas['instance_identifier']  })
+                sensor_data.push({ 'counter_name' => datas['counter_name']  })
+
+                ## Clean up Current object
+                datas.delete("name")
+                datas.delete("instance_identifier")
+                datas.delete("counter_name")
+
+                datas.each do |type, value|
+
+                    sensor_data.push({ 'type' =>  'lsp_stats.' + type  })
+                    sensor_data.push({ 'value' => value  })
+
+                    record = build_record(output_format, sensor_data)
+                    yield gpb_time, record
+
+                end
+              rescue => e
+                $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
+                $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
+              end
+            end
 
             ##############################################################
             ### Support for resource /junos/system/linecard/interface/logical/usage ##
