@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |s|
   s.name          = "fluent-plugin-juniper-telemetry"
-  s.version       = '0.2.10'
+  s.version       = '0.2.11'
   s.authors       = ["Damien Garros"]
   s.email         = ["dgarros@gmail.com"]
 
