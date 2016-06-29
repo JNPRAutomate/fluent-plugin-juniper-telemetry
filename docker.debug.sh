@@ -8,6 +8,6 @@ docker run --rm -t \
     -p 40010:40010/udp -p 40011:40011/udp -p 40012:40012/udp \
     -p 40020:40020/udp -p 40021:40021/udp -p 40022:40022/udp \
     -p 40030:40030/udp \
-    --volume $(pwd):/root/fluentd-plugin-juniper-telemetry \
+    --volume $(pwd):/home/fluent/fluentd-plugin-juniper-telemetry \
     --name fluent-plugin-juniper-telemetry_con \
-    -i fluent-plugin-juniper-telemetry /sbin/my_init -- bash -l
+    -i fluent-plugin-juniper-telemetry /home/fluent/fluentd.sh

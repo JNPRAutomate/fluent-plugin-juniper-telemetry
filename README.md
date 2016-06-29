@@ -124,7 +124,7 @@ It will mount the project under the directory /gpb inside the container and comp
 Newly created .rb will be stored under lib/
 
 ```
-docker run --rm -t -v $(pwd):/gpb -i fluent-plugin-juniper-telemetry /bin/sh /root/compile_protofile.sh
+docker run --rm -t -v $(pwd):/gpb -i fluent-plugin-juniper-telemetry /bin/sh /home/fluent/compile_protofile.sh
 ```
 
 ## Packet samples for development and troubleshooting
@@ -144,6 +144,15 @@ docker run --rm -t -v $(pwd):/data -i dgarros/tcpreplay /usr/bin/tcpreplay --int
 Rewrite destination Mac and IP addresses
 ```
 docker run --rm -t -v $(pwd):/data -i dgarros/tcpreplay /usr/bin/tcprewrite --infile=jvision_phy_int.pcap --outfile=jvision_phy_int_fixed.pcap --dstipmap=10.92.71.225:172.17.255.255 --enet-dmac=01:00:05:11:00:06 --fixcsum
+```
+
+## Decode packet with protoc
+
+Save packet payload in raw format using Wireshark > File > export packets bytes
+
+```
+cd packet_examples
+cat jti_ifd_01.raw | protoc -I=../junos-telemetry --decode=TelemetryStream ../junos-telemetry/port.proto
 ```
 
 ## Build gem
