@@ -3,5 +3,5 @@
 # If you omit that part, the command will be run as root.
 # fluentd -c /fluent/fluent.conf -vv
 fluentd -c //home/fluent/fluentd-plugin-juniper-telemetry/fluent.conf \
-        -vvv \
+        -v \
         -p //home/fluent/fluentd-plugin-juniper-telemetry/lib/fluent/plugin
