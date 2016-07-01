@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -78,6 +78,6 @@ end
 # Extended Message Fields
 #
 class ::JuniperNetworksSensors < ::Protobuf::Message
-  optional ::Firewall, :jnpr_firewall_ext, 6, :extension => true
+  optional ::Firewall, :".jnpr_firewall_ext", 6, :extension => true
 end
 

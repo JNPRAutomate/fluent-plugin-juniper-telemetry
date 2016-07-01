@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -84,6 +84,6 @@ end
 # Extended Message Fields
 #
 class ::JuniperNetworksSensors < ::Protobuf::Message
-  optional ::GPort, :jnpr_interface_ext, 3, :extension => true
+  optional ::GPort, :".jnpr_interface_ext", 3, :extension => true
 end
 

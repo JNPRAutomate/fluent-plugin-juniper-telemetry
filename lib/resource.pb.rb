@@ -3,9 +3,10 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 module Resource
+  ::Protobuf::Optionable.inject(self) { ::Google::Protobuf::FileOptions }
 
   ##
   # Message Classes
@@ -28,4 +29,6 @@ module Resource
     optional :string, :data_id, 2
     repeated ::Resource::AttributeStats, :attribute, 5
   end
+
 end
+

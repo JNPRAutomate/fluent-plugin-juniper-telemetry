@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -41,6 +41,6 @@ end
 # Extended Message Fields
 #
 class ::JuniperNetworksSensors < ::Protobuf::Message
-  optional ::LspStats, :jnpr_lsp_statistics_ext, 5, :extension => true
+  optional ::LspStats, :".jnpr_lsp_statistics_ext", 5, :extension => true
 end
 
