@@ -1,0 +1,28 @@
+message OpenConfigData {
+    // device name or IP address
+    optional string    device_id         = 1;
+
+    // line card or RE slot no
+    optional string    component_id      = 2;
+
+    // timestamp (milliseconds since epoc)
+    required uint64    timestamp         = 3;
+
+    repeated  KeyValue kv       = 4;
+}
+
+message KeyValue {
+    // Key: Complete XPATH appended with data attribute
+    // XPATH fully qualifies linecard, queue no etc
+    required string key = 1;
+
+    oneof value {
+        double    double_value   = 2;
+        int64     int_value      = 3;
+        uint64    uint_value     = 4;
+        sint64    sint_value     = 5;
+        bool      bool_value     = 6;
+        string    string_value   = 7;
+        bytes     bytes_value    = 8;
+    }
+}
