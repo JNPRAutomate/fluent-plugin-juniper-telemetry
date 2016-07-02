@@ -36,7 +36,7 @@ module Fluent
           record['component'] = component_id
 
           # Extract type info
-          type = kv.key.match(/([a-zA-Z\-\_]*)$/)
+          type = kv.key.match(/([a-zA-Z0-9\-\_]*)$/)
           record['type'] = type
 
           # Extract Value
@@ -54,7 +54,7 @@ module Fluent
               if attribute[1] == "name"
                 record[attribute[0]] = attribute[2]
   	      elsif attribute[1] == "queue_number"
-                record[attribute[0]] = attribute[2] 
+                record[attribute[0]] = attribute[2]
               end
             end
           end
