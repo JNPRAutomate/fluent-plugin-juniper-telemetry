@@ -42,14 +42,23 @@ module Fluent
           # Extract Value
           record['value'] = kv.int_value
 
+	  record['path'] = kv.key
+
           # Try to extract attribute information
           # Check how it will looks with multiple attribute per string
-          attribute = kv.key.match(/\/([^\/]*)\[([A-Za-z0-9\-]*)\=([^\[]*)\]/)
-          if attribute
-            if attribute[2] == "name"
-              record[attribute[1]] = attribute[3]
+          attributes = kv.key.scan(/\/([^\/]*)\[([A-Za-z0-9\-\_]*)\=([^\[]*)\]/)
+ 	  #$log.info attributes.inspect.to_s
+
+          if attributes
+	    attributes.each do |attribute|
+              if attribute[1] == "name"
+                record[attribute[0]] = attribute[2]
+  	      elsif attribute[1] == "queue_number"
+                record[attribute[0]] = attribute[2] 
+              end
             end
           end
+
           yield gpb_time, record
         end
       end
