@@ -212,6 +212,12 @@ module Fluent
                 datas.delete("snmp_if_index")
                 datas.delete("op_state")
 
+                # Check if the interface has a parent
+                if datas.key?('parent_ae_name')
+                  sensor_data.push({ 'interface_parent' =>  datas['parent_ae_name']  })
+                  datas.delete("parent_ae_name")
+                end
+
                 datas.each do |section, data|
                   data.each do |type, value|
 
