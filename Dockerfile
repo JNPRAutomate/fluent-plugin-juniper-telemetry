@@ -1,68 +1,78 @@
-FROM phusion/baseimage:0.9.18
+FROM fluent/fluentd:v0.12.29
 MAINTAINER Damien Garros <dgarros@gmail.com>
 
-RUN     apt-get -y update && \
-        apt-get -y upgrade
+USER root
+WORKDIR /home/fluent
 
-# dependencies
-RUN     apt-get -y --force-yes install \
-        git adduser libfontconfig wget ruby ruby-dev make curl \
-        build-essential tcpdump libprotobuf-dev protobuf-compiler
+## Install python
+RUN apk update \
+    && apk add python-dev py-pip \
+    && pip install --upgrade pip \
+    && pip install envtpl
+    # && apk del -r --purge gcc make g++ \
+    # && rm -rf /var/cache/apk/*
 
-## Enable SSH
-RUN     rm -f /etc/service/sshd/down
-RUN     /usr/sbin/enable_insecure_key
+ENV PATH /home/fluent/.gem/ruby/2.2.0/bin:$PATH
 
-#####################################
-### Install google protocol buffer ##
-#####################################
+RUN apk --no-cache --update add \
+                            build-base \
+                            ruby-dev && \
+    echo 'gem: --no-document' >> /etc/gemrc
+RUN gem install --no-ri --no-rdoc \
+              statsd-ruby \
+              dogstatsd-ruby \
+              bigdecimal
+    # apk del build-base ruby-dev && \
+    # rm -rf /tmp/* /var/tmp/* /var/cache/apk/*
 
-RUN     gem install protobuf && \
-        mkdir /gpb
+RUN apk add gcc
 
-ADD     junos-telemetry/compile_protofile.sh /root/compile_protofile.sh
-RUN     chmod +x /root/compile_protofile.sh
+RUN apk update &&\
+    apk add ca-certificates &&\
+    update-ca-certificates &&\
+    apk add openssl
 
-########################
-### Install Fluentd  ###
-########################
-
-RUN     gem install fluentd rake bundler --no-ri --no-rdoc
-RUN     gem install fluent-plugin-file-sprintf
-
-ADD     fluentd/fluent.conf /fluent/fluent.conf
-RUN     fluentd --setup ./fluent
-
-ADD     fluentd/fluentd.launcher.sh /etc/service/fluentd/run
-RUN     chmod +x /etc/service/fluentd/run
-
-ADD     fluentd/showlog.sh /root/showlog.sh
-RUN     chmod +x /root/showlog.sh
-
-######################################################
-### Create directory to mount local file           ###
-######################################################
-
-RUN     mkdir /root/fluentd-plugin-juniper-telemetry
-ENV     RUBYLIB   /root/fluentd-plugin-juniper-telemetry/lib
-
-WORKDIR "/root"
-
-# WORKDIR "/root/fluentd-plugin-juniper-telemetry"
+# RUN     cd /tmp && \
+#         wget https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protobuf-cpp-3.0.0-beta-3.tar.gz&&\
+#         tar -xzf protobuf-cpp-3.0.0-beta-3.tar.gz &&\
+#         cd protobuf-3.0.0-beta-3 &&\
+#         ./configure --prefix=/usr &&\
+#         make &&\
+#         make install
 #
-# ADD     lib /root/fluentd-plugin-juniper-telemetry/lib
-# ADD     junos-telemetry /root/fluentd-plugin-juniper-telemetry/junos-telemetry
-#
-# ADD     Gemfile Gemfile
-# ADD     Rakefile Rakefile
-# ADD     fluent-plugin-juniper-telemetry.gemspec fluent-plugin-juniper-telemetry.gemspec
-#
-# RUN     rake install
+RUN     cd /tmp && \
+        wget https://github.com/google/protobuf/releases/download/v2.6.1/protobuf-2.6.1.tar.gz &&\
+        tar -xzf protobuf-2.6.1.tar.gz &&\
+        cd protobuf-2.6.1 &&\
+        ./configure --prefix=/usr &&\
+        make &&\
+        make install
 
-RUN     apt-get clean && \
-        rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+WORKDIR /home/fluent/
+RUN     mkdir fluentd-plugin-juniper-telemetry
+ADD     fluentd/fluentd.launcher.sh fluentd.sh
+RUN     chmod +x fluentd.sh
+ENV     RUBYLIB   /home/fluent/fluentd-plugin-juniper-telemetry/lib
 
-ENV HOME /root
-RUN chmod -R 777 /var/log/
+RUN     gem install --prerelease protobuf
+# RUN     gem install --prerelease google-protobuf
 
-CMD ["/sbin/my_init"]
+COPY    junos-telemetry/compile_protofile.sh compile_protofile.sh
+
+USER fluent
+# RUN    export PATH="/home/fluent:$PATH"
+# RUN     wget https://github.com/google/protobuf/releases/download/v3.0.0-beta-3/protoc-3.0.0-beta-3-linux-x86_32.zip
+# RUN     unzip protoc-3.0.0-beta-3-linux-x86_32.zip
+
+WORKDIR /home/fluent/
+# Copy Start script to generate configuration dynamically
+#ADD     fluentd-alpine.start.sh         fluentd-alpine.start.sh
+#RUN     chown -R fluent:fluent fluentd-alpine.start.sh
+#RUN     chmod 777 fluentd-alpine.start.sh
+
+USER fluent
+EXPOSE 24284
+
+CMD fluentd -c /home/fluent/fluentd-plugin-juniper-telemetry/fluentd/fluent.conf \
+        -v \
+        -p /home/fluent/fluentd-plugin-juniper-telemetry/lib/fluent/plugin
