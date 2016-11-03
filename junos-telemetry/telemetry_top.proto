@@ -2,7 +2,7 @@
 // Copyrights (c)  2015, Juniper Networks, Inc.
 // All rights reserved.
 //
-// Version 1.0
+
 //
 // Licensed to the Apache Software Foundation (ASF) under one
 // or more contributor license agreements.  See the NOTICE file
@@ -29,20 +29,20 @@
 //
 
 import "google/protobuf/descriptor.proto";
- 
+
 extend google.protobuf.FieldOptions {
     optional TelemetryFieldOptions telemetry_options = 1024;
 }
- 
+
 message TelemetryFieldOptions {
     optional bool is_key             = 1;
     optional bool is_timestamp       = 2;
     optional bool is_counter         = 3;
     optional bool is_gauge           = 4;
 }
- 
+
 message TelemetryStream {
-    // router name or export IP address    
+    // router name or export IP address
     required string system_id        = 1 [(telemetry_options).is_key = true];
 
     // line card / RE (slot number)
@@ -55,10 +55,10 @@ message TelemetryStream {
     optional string sensor_name      = 4 [(telemetry_options).is_key = true];
 
     // sequence number, monotonically increasesing for each
-    // system_id, component_id, sub_component_id + sensor_name. 
+    // system_id, component_id, sub_component_id + sensor_name.
     optional uint32 sequence_number  = 5;
 
-    // timestamp (seconds since epoch)
+    // timestamp (milliseconds since 00:00:00 UTC 1/1/1970)
     optional uint64 timestamp        = 6 [(telemetry_options).is_timestamp = true];
 
     // major version
@@ -88,4 +88,3 @@ extend EnterpriseSensors {
 message JuniperNetworksSensors {
     extensions 1 to max;
 }
-

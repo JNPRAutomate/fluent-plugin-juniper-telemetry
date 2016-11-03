@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -50,10 +50,10 @@ end
 # Extended Message Fields
 #
 class ::Google::Protobuf::FieldOptions < ::Protobuf::Message
-  optional ::TelemetryFieldOptions, :telemetry_options, 1024, :extension => true
+  optional ::TelemetryFieldOptions, :".telemetry_options", 1024, :extension => true
 end
 
 class ::EnterpriseSensors < ::Protobuf::Message
-  optional ::JuniperNetworksSensors, :juniperNetworks, 2636, :extension => true
+  optional ::JuniperNetworksSensors, :".juniperNetworks", 2636, :extension => true
 end
 
