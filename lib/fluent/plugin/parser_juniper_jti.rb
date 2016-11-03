@@ -273,7 +273,47 @@ module Fluent
                 $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
               end
             end
+          #####################################################################
+          ### Support for resource /junos/XX /##
+          #####################################################################
+          # {"cpu_memory_util_ext"=>{"utilization"=>[
+          #      {"name"=>"Kernel", "size"=>1878212988, "bytes_allocated"=>1715854768, "utilization"=>91},
+          #      {"name"=>"LAN buffer", "size"=>67108860, "bytes_allocated"=>10721208, "utilization"=>15},
+          #      {"name"=>"Blob", "size"=>52428784, "bytes_allocated"=>0, "utilization"=>0},
+          #      {"name"=>"ISSU scratch", "size"=>62914556, "bytes_allocated"=>0, "utilization"=>0}]}}
+          elsif sensor == "cpu_memory_util_ext"
 
+            resource = "/junos/XX/"
+
+            datas_sensors[sensor]['utilization'].each do |datas|
+
+              # Save all info extracted on a list
+              sensor_data = []
+
+              begin
+                ## Extract interface name and clean up
+                sensor_data.push({ 'device' => device_name  })
+
+                name = clean_up_name(datas['name'])
+
+                ## Clean up Current object
+                datas.delete("name")
+
+                datas.each do |type, value|
+
+                  sensor_data.push({ 'type' =>  'cpu_mem.' + type })
+                  sensor_data.push({ 'name' => name  })
+                  sensor_data.push({ 'value' => value  })
+
+                  record = build_record(output_format, sensor_data)
+                  yield gpb_time, record
+
+                end
+              rescue => e
+                $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
+                $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
+              end
+            end
           else
             $log.warn  "Unsupported sensor : " + sensor
             # puts datas_sensors[sensor].inspect.to_s
