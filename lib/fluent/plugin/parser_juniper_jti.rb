@@ -123,30 +123,7 @@ module Fluent
                 $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
               end
             end
-            ##############################################################
-            ### Support for resource /junos/system/linecard/firewall/  ##
-            ##############################################################
-            # elsif sensor == "jnpr_firewall_ext"
-            #
-            #   resource = "/junos/system/linecard/firewall"
-            #
-            #   datas_sensors[sensor]['firewall_stats'].each do |datas|
-            #
-            #     begin
-            #       ## Extract interface name and clean up
-            #       sensor_data.push({ 'device' => device_name  })
-            #       sensor_data.push({ 'filter_name' => datas['filter_name']  })
-            #
-            #       ## Clean up Current object
-            #       # datas.delete("filter_name")
-            #
-            #       $log.warn  "Sensor Filter : " + datas['filter_name']
-            #
-            #     rescue
-            #       $log.warn   "Unable to parse " + sensor + " sensor, an error occured.."
-            #       $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
-            #     end
-            #   end
+
             #####################################################################
             ### Support for resource /junos/services/label-switched-path/usage/##
             #####################################################################
@@ -262,18 +239,20 @@ module Fluent
                     datas.delete("filter_name")
                     datas.delete("timestamp")
 
-                    datas['memory_usage'].each do |memory_usage|
-                        sensor_data.push({ 'type' =>  'memory_usage.' + memory_usage['name'] })
-                        sensor_data.push({ 'value' =>  memory_usage['allocated']  })
-                        memory_usage.delete("name")
-                        memory_usage.delete("allocated")
+                    if datas.key?('memory_usage')
+                      datas['memory_usage'].each do |memory_usage|
+                          sensor_data.push({ 'type' =>  'memory_usage.' + memory_usage['name'] })
+                          sensor_data.push({ 'value' =>  memory_usage['allocated']  })
+                          memory_usage.delete("name")
+                          memory_usage.delete("allocated")
 
-                        record = build_record(output_format, sensor_data)
-                        yield gpb_time, record
+                          record = build_record(output_format, sensor_data)
+                          yield gpb_time, record
+                      end
+
+                      ## Clean up Current object
+                      datas.delete("memory_usage")
                     end
-
-                    ## Clean up Current object
-                    datas.delete("memory_usage")
 
                     if datas.key?('counter_stats')
                         datas['counter_stats'].each do |counters|
