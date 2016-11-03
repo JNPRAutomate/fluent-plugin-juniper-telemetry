@@ -124,7 +124,7 @@ It will mount the project under the directory /gpb inside the container and comp
 Newly created .rb will be stored under lib/
 
 ```
-docker run --rm -t -v $(pwd):/gpb -i fluent-plugin-juniper-telemetry /bin/sh /root/compile_protofile.sh
+docker run --rm -t -v $(pwd):/gpb -i fluent-plugin-juniper-telemetry /bin/sh /home/fluent/compile_protofile.sh
 ```
 
 ## Packet samples for development and troubleshooting
