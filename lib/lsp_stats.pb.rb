@@ -43,3 +43,4 @@ end
 class ::JuniperNetworksSensors < ::Protobuf::Message
   optional ::LspStats, :".jnpr_lsp_statistics_ext", 5, :extension => true
 end
+
