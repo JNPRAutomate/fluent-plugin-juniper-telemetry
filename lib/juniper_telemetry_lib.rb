@@ -15,7 +15,7 @@ def epoc_to_sec(epoc)
   elsif nbr_digit == 16
     return (epoc.to_i/1000000).to_i
   end
-  
+
   return epoc
 end
 
@@ -28,6 +28,7 @@ def clean_up_name(name)
     tmp.gsub!('/', '_')
     tmp.gsub!(':', '_')
     tmp.gsub!('.', '_')
+    tmp.gsub!(' ', '_')
 
     return tmp
 end
