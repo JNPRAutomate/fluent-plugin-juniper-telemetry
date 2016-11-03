@@ -57,7 +57,9 @@ module Fluent
           ##############################################################
           if sensor == "jnpr_interface_ext"
 
+
             resource = "/junos/system/linecard/interface/"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['interface_stats'].each do |datas|
 
@@ -133,6 +135,7 @@ module Fluent
             elsif sensor == "jnpr_lsp_statistics_ext"
 
               resource = "/junos/services/label-switched-path/usage/"
+              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
               datas_sensors[sensor]['lsp_stats_records'].each do |datas|
 
@@ -172,6 +175,7 @@ module Fluent
             elsif sensor == "jnprLogicalInterfaceExt"
 
               resource = "/junos/system/linecard/interface/logical/usage"
+              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
               datas_sensors[sensor]['interface_info'].each do |datas|
 
@@ -198,12 +202,28 @@ module Fluent
                 datas.each do |section, data|
                   data.each do |type, value|
 
-                    sensor_data.push({ 'type' => section + '.' + type  })
-                    sensor_data.push({ 'value' => value  })
+                    local_sensor_data = sensor_data.dup
 
-                    record = build_record(output_format, sensor_data)
-                    yield gpb_time, record
+                    if value.kind_of?(Array)
+                      value.each do |entry|
 
+                        ['if_packets', 'if_octets'].each do |data_type|
+                          local_sensor_data.push({ 'forwarding_class' => entry['fc_number'] })
+                          local_sensor_data.push({ 'family' => entry['if_family'] })
+                          local_sensor_data.push({ 'type' => section + '.' + type + '.' + data_type })
+                          local_sensor_data.push({ 'value' => entry[data_type]  })
+
+                          record = build_record(output_format, local_sensor_data)
+                          yield gpb_time, record
+                        end
+                      end
+                    else
+                      local_sensor_data.push({ 'type' => section + '.' + type  })
+                      local_sensor_data.push({ 'value' => value  })
+
+                      record = build_record(output_format, local_sensor_data)
+                      yield gpb_time, record
+                    end
                   end
                 end
               rescue => e
@@ -223,6 +243,7 @@ module Fluent
             elsif sensor == "jnpr_firewall_ext"
 
               resource = "/junos/system/linecard/firewall/"
+              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
               datas_sensors[sensor]['firewall_stats'].each do |datas|
 
