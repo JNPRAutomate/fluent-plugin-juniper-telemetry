@@ -25,7 +25,7 @@
 //
 
 
-import "jvision_top.proto";
+import "telemetry_top.proto";
 
 
 //
@@ -67,7 +67,7 @@ message LogicalInterfaceInfo {
     optional EgressInterfaceStats egress_stats   = 6;
 
     // Link state UP\DOWN etc.
-    optional OperationalState op_state           = 7; 
+    optional OperationalState op_state           = 7;
 }
 
 
@@ -79,7 +79,7 @@ message IngressInterfaceStats {
     required uint64 if_packets                     = 1 [(telemetry_options).is_counter = true];
 
     // Count of bytes
-    required uint64 if_octets                      = 2 [(telemetry_options).is_counter = true]; 
+    required uint64 if_octets                      = 2 [(telemetry_options).is_counter = true];
 
     // Count of unicast packets
     optional uint64 if_ucast_packets               = 3 [(telemetry_options).is_counter = true];

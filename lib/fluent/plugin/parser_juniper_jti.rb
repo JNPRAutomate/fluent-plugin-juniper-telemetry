@@ -1,6 +1,6 @@
 require 'juniper_telemetry_lib.rb'
 require 'protobuf'
-require 'jvision_top.pb.rb'
+require 'telemetry_top.pb.rb'
 require 'port.pb.rb'
 require 'lsp_stats.pb.rb'
 require 'logical_port.pb.rb'

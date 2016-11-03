@@ -3,7 +3,7 @@
 ##
 # This file is auto-generated. DO NOT EDIT!
 #
-require 'protobuf/message'
+require 'protobuf'
 
 
 ##
@@ -106,4 +106,3 @@ class Lsp_mon
   optional ::Lsp_monitor_data_event, :event_field, 2
   optional ::Lsp_monitor_data_property, :property_field, 3
 end
-
