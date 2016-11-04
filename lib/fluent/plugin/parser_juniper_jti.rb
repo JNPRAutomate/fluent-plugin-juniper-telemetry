@@ -5,6 +5,7 @@ require 'port.pb.rb'
 require 'lsp_stats.pb.rb'
 require 'logical_port.pb.rb'
 require 'firewall.pb.rb'
+require 'cpu_memory_utilization.pb.rb'
 
 module Fluent
   class TextParser
@@ -57,9 +58,7 @@ module Fluent
           ##############################################################
           if sensor == "jnpr_interface_ext"
 
-
             resource = "/junos/system/linecard/interface/"
-            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['interface_stats'].each do |datas|
 
@@ -126,18 +125,17 @@ module Fluent
               end
             end
 
-            #####################################################################
-            ### Support for resource /junos/services/label-switched-path/usage/##
-            #####################################################################
-            #datas Dump : {"name"=>"to_mx104-9", "instance_identifier"=>0,
-            #  "counter_name"=>"c-25", "packets"=>2521648779, "bytes"=>2526692076558,
-            #  "packet_rate"=>598640, "byte_rate"=>599837511}
-            elsif sensor == "jnpr_lsp_statistics_ext"
+          #####################################################################
+          ### Support for resource /junos/services/label-switched-path/usage/##
+          #####################################################################
+          #datas Dump : {"name"=>"to_mx104-9", "instance_identifier"=>0,
+          #  "counter_name"=>"c-25", "packets"=>2521648779, "bytes"=>2526692076558,
+          #  "packet_rate"=>598640, "byte_rate"=>599837511}
+          elsif sensor == "jnpr_lsp_statistics_ext"
 
-              resource = "/junos/services/label-switched-path/usage/"
-              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
+            resource = "/junos/services/label-switched-path/usage/"
 
-              datas_sensors[sensor]['lsp_stats_records'].each do |datas|
+            datas_sensors[sensor]['lsp_stats_records'].each do |datas|
 
               # Save all info extracted on a list
               sensor_data = []
@@ -169,15 +167,65 @@ module Fluent
               end
             end
 
-            ##############################################################
-            ### Support for resource /junos/system/linecard/interface/logical/usage ##
-            ##############################################################
-            elsif sensor == "jnprLogicalInterfaceExt"
+          ##############################################################
+          ### Support for resource /junos/system/linecard/interface/logical/usage ##
+          ##############################################################
+          elsif sensor == "jnprLogicalInterfaceExt"
 
-              resource = "/junos/system/linecard/interface/logical/usage"
-              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
+            resource = "/junos/system/linecard/interface/logical/usage"
 
-              datas_sensors[sensor]['interface_info'].each do |datas|
+            datas_sensors[sensor]['interface_info'].each do |datas|
+
+            # Save all info extracted on a list
+            sensor_data = []
+
+            begin
+              ## Extract interface name and clean up
+              sensor_data.push({ 'device' => device_name  })
+              sensor_data.push({ 'interface' => datas['if_name']  })
+
+              ## Clean up Current object
+              datas.delete("if_name")
+              datas.delete("init_time")
+              datas.delete("snmp_if_index")
+              datas.delete("op_state")
+
+              # Check if the interface has a parent
+              if datas.key?('parent_ae_name')
+                sensor_data.push({ 'interface_parent' =>  datas['parent_ae_name']  })
+                datas.delete("parent_ae_name")
+              end
+
+              datas.each do |section, data|
+                data.each do |type, value|
+
+                  sensor_data.push({ 'type' => section + '.' + type  })
+                  sensor_data.push({ 'value' => value  })
+
+                  record = build_record(output_format, sensor_data)
+                  yield gpb_time, record
+
+                end
+              end
+            rescue => e
+              $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
+              $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
+            end
+          end
+
+          ##############################################################
+          ### Support for resource /junos/system/linecard/firewall/   ##
+          ##############################################################
+          #{"message":"Unable to parse jnpr_firewall_ext sensor, Data Dump : {\"jnpr_firewall_ext\"=>
+          #{\"firewall_stats\"=>[{\"filter_name\"=>\"__default_bpdu_filter__\", \"timestamp\"=>1465467390, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>2440}]},
+          #{\"filter_name\"=>\"test\", \"timestamp\"=>1465467390, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>1688}],
+          #\"counter_stats\"=>[{\"name\"=>\"cnt1\", \"packets\"=>79, \"bytes\"=>6320}]},
+          #{\"filter_name\"=>\"__default_arp_policer__\", \"timestamp\"=>1464456904, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>1600}]}]}}"}
+          elsif sensor == "jnpr_firewall_ext"
+
+            resource = "/junos/system/linecard/firewall/"
+
+            datas_sensors[sensor]['firewall_stats'].each do |datas|
 
               # Save all info extracted on a list
               sensor_data = []
@@ -185,114 +233,87 @@ module Fluent
               begin
                 ## Extract interface name and clean up
                 sensor_data.push({ 'device' => device_name  })
-                sensor_data.push({ 'interface' => datas['if_name']  })
+                sensor_data.push({ 'filter_name' => datas['filter_name']  })
+                sensor_data.push({ 'filter_timestamp' => datas['timestamp']  })
 
                 ## Clean up Current object
-                datas.delete("if_name")
-                datas.delete("init_time")
-                datas.delete("snmp_if_index")
-                datas.delete("op_state")
+                datas.delete("filter_name")
+                datas.delete("timestamp")
 
-                # Check if the interface has a parent
-                if datas.key?('parent_ae_name')
-                  sensor_data.push({ 'interface_parent' =>  datas['parent_ae_name']  })
-                  datas.delete("parent_ae_name")
+                if datas.key?('memory_usage')
+                  datas['memory_usage'].each do |memory_usage|
+                    sensor_data.push({ 'type' =>  'memory_usage.' + memory_usage['name'] })
+                    sensor_data.push({ 'value' =>  memory_usage['allocated']  })
+                    memory_usage.delete("name")
+                    memory_usage.delete("allocated")
+
+                    record = build_record(output_format, sensor_data)
+                    yield gpb_time, record
+                  end
+
+                  ## Clean up Current object
+                  datas.delete("memory_usage")
                 end
 
-                datas.each do |section, data|
-                  data.each do |type, value|
-
-                    local_sensor_data = sensor_data.dup
-
-                    if value.kind_of?(Array)
-                      value.each do |entry|
-
-                        ['if_packets', 'if_octets'].each do |data_type|
-                          local_sensor_data.push({ 'forwarding_class' => entry['fc_number'] })
-                          local_sensor_data.push({ 'family' => entry['if_family'] })
-                          local_sensor_data.push({ 'type' => section + '.' + type + '.' + data_type })
-                          local_sensor_data.push({ 'value' => entry[data_type]  })
-
-                          record = build_record(output_format, local_sensor_data)
-                          yield gpb_time, record
-                        end
-                      end
-                    else
-                      local_sensor_data.push({ 'type' => section + '.' + type  })
-                      local_sensor_data.push({ 'value' => value  })
-
-                      record = build_record(output_format, local_sensor_data)
+                if datas.key?('counter_stats')
+                  datas['counter_stats'].each do |counters|
+                    sensor_data.push({ 'filter_counter_name' => counters['name']  })
+                    counters.delete("name")
+                    counters.each do |type, value|
+                      sensor_data.push({ 'type' =>  'filter_counter.' + type  })
+                      sensor_data.push({ 'value' => value  })
+                      record = build_record(output_format, sensor_data)
                       yield gpb_time, record
                     end
                   end
                 end
+
               rescue => e
                 $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
-                $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas.inspect.to_s
+                $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
               end
             end
+          #####################################################################
+          ### Support for resource /junos/XX /##
+          #####################################################################
+          # {"cpu_memory_util_ext"=>{"utilization"=>[
+          #      {"name"=>"Kernel", "size"=>1878212988, "bytes_allocated"=>1715854768, "utilization"=>91},
+          #      {"name"=>"LAN buffer", "size"=>67108860, "bytes_allocated"=>10721208, "utilization"=>15},
+          #      {"name"=>"Blob", "size"=>52428784, "bytes_allocated"=>0, "utilization"=>0},
+          #      {"name"=>"ISSU scratch", "size"=>62914556, "bytes_allocated"=>0, "utilization"=>0}]}}
+          elsif sensor == "cpu_memory_util_ext"
 
-            ##############################################################
-            ### Support for resource /junos/system/linecard/firewall/   ##
-            ##############################################################
-            #{"message":"Unable to parse jnpr_firewall_ext sensor, Data Dump : {\"jnpr_firewall_ext\"=>
-            #{\"firewall_stats\"=>[{\"filter_name\"=>\"__default_bpdu_filter__\", \"timestamp\"=>1465467390, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>2440}]},
-            #{\"filter_name\"=>\"test\", \"timestamp\"=>1465467390, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>1688}],
-            #\"counter_stats\"=>[{\"name\"=>\"cnt1\", \"packets\"=>79, \"bytes\"=>6320}]},
-            #{\"filter_name\"=>\"__default_arp_policer__\", \"timestamp\"=>1464456904, \"memory_usage\"=>[{\"name\"=>\"HEAP\", \"allocated\"=>1600}]}]}}"}
-            elsif sensor == "jnpr_firewall_ext"
+            resource = "/junos/XX/"
 
-              resource = "/junos/system/linecard/firewall/"
-              $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
+            datas_sensors[sensor]['utilization'].each do |datas|
 
-              datas_sensors[sensor]['firewall_stats'].each do |datas|
+              # Save all info extracted on a list
+              sensor_data = []
 
-                  # Save all info extracted on a list
-                  sensor_data = []
+              begin
+                ## Extract interface name and clean up
+                sensor_data.push({ 'device' => device_name  })
 
-                  begin
-                    ## Extract interface name and clean up
-                    sensor_data.push({ 'device' => device_name  })
-                    sensor_data.push({ 'filter_name' => datas['filter_name']  })
-                    sensor_data.push({ 'filter_timestamp' => datas['timestamp']  })
+                name = clean_up_name(datas['name'])
 
-                    ## Clean up Current object
-                    datas.delete("filter_name")
-                    datas.delete("timestamp")
+                ## Clean up Current object
+                datas.delete("name")
 
-                    if datas.key?('memory_usage')
-                      datas['memory_usage'].each do |memory_usage|
-                          sensor_data.push({ 'type' =>  'memory_usage.' + memory_usage['name'] })
-                          sensor_data.push({ 'value' =>  memory_usage['allocated']  })
-                          memory_usage.delete("name")
-                          memory_usage.delete("allocated")
+                datas.each do |type, value|
 
-                          record = build_record(output_format, sensor_data)
-                          yield gpb_time, record
-                      end
+                  sensor_data.push({ 'type' =>  'cpu_mem.' + type })
+                  sensor_data.push({ 'name' => name  })
+                  sensor_data.push({ 'value' => value  })
 
-                      ## Clean up Current object
-                      datas.delete("memory_usage")
-                    end
+                  record = build_record(output_format, sensor_data)
+                  yield gpb_time, record
 
-                    if datas.key?('counter_stats')
-                        datas['counter_stats'].each do |counters|
-                             sensor_data.push({ 'filter_counter_name' => counters['name']  })
-                             counters.delete("name")
-                             counters.each do |type, value|
-                                 sensor_data.push({ 'type' =>  'filter_counter.' + type  })
-                                 sensor_data.push({ 'value' => value  })
-                                 record = build_record(output_format, sensor_data)
-                                 yield gpb_time, record
-                            end
-                        end
-                    end
-
-                  rescue => e
-                    $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
-                    $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
-                  end
+                end
+              rescue => e
+                $log.warn   "Unable to parse " + sensor + " sensor, Error during processing: #{$!}"
+                $log.debug  "Unable to parse " + sensor + " sensor, Data Dump : " + datas_sensors.inspect.to_s
               end
+            end
           else
             $log.warn  "Unsupported sensor : " + sensor
             # puts datas_sensors[sensor].inspect.to_s
