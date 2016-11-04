@@ -202,12 +202,29 @@ module Fluent
               datas.each do |section, data|
                 data.each do |type, value|
 
-                  sensor_data.push({ 'type' => section + '.' + type  })
-                  sensor_data.push({ 'value' => value  })
+                  local_sensor_data = sensor_data.dup
 
-                  record = build_record(output_format, sensor_data)
-                  yield gpb_time, record
+                  if value.kind_of?(Array)
+                    value.each do |entry|
 
+                      ['if_packets', 'if_octets'].each do |data_type|
+                        local_sensor_data.push({ 'forwarding_class' => entry['fc_number'] })
+                        local_sensor_data.push({ 'family' => entry['if_family'] })
+                        local_sensor_data.push({ 'type' => section + '.' + type + '.' + data_type })
+                        local_sensor_data.push({ 'value' => entry[data_type]  })
+
+                        record = build_record(output_format, local_sensor_data)
+                        yield gpb_time, record
+                      end
+                    end
+                  else
+                    local_sensor_data.push({ 'type' => section + '.' + type  })
+                    local_sensor_data.push({ 'value' => value  })
+
+                    record = build_record(output_format, local_sensor_data)
+
+                    yield gpb_time, record
+                  end
                 end
               end
             rescue => e
