@@ -59,6 +59,7 @@ module Fluent
           if sensor == "jnpr_interface_ext"
 
             resource = "/junos/system/linecard/interface/"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['interface_stats'].each do |datas|
 
@@ -134,6 +135,7 @@ module Fluent
           elsif sensor == "jnpr_lsp_statistics_ext"
 
             resource = "/junos/services/label-switched-path/usage/"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['lsp_stats_records'].each do |datas|
 
@@ -173,6 +175,7 @@ module Fluent
           elsif sensor == "jnprLogicalInterfaceExt"
 
             resource = "/junos/system/linecard/interface/logical/usage"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['interface_info'].each do |datas|
 
@@ -224,6 +227,7 @@ module Fluent
           elsif sensor == "jnpr_firewall_ext"
 
             resource = "/junos/system/linecard/firewall/"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['firewall_stats'].each do |datas|
 
@@ -274,16 +278,12 @@ module Fluent
               end
             end
           #####################################################################
-          ### Support for resource /junos/XX /##
+          ### Support for resource /junos/TBD /##
           #####################################################################
-          # {"cpu_memory_util_ext"=>{"utilization"=>[
-          #      {"name"=>"Kernel", "size"=>1878212988, "bytes_allocated"=>1715854768, "utilization"=>91},
-          #      {"name"=>"LAN buffer", "size"=>67108860, "bytes_allocated"=>10721208, "utilization"=>15},
-          #      {"name"=>"Blob", "size"=>52428784, "bytes_allocated"=>0, "utilization"=>0},
-          #      {"name"=>"ISSU scratch", "size"=>62914556, "bytes_allocated"=>0, "utilization"=>0}]}}
           elsif sensor == "cpu_memory_util_ext"
 
-            resource = "/junos/XX/"
+            resource = "/junos/TBD/"
+            $log.debug  "Will extract info for Sensor: #{sensor} / Resource #{resource}"
 
             datas_sensors[sensor]['utilization'].each do |datas|
 
