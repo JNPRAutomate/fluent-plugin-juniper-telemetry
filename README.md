@@ -148,12 +148,9 @@ docker run --rm -t -v $(pwd):/data -i dgarros/tcpreplay /usr/bin/tcprewrite --in
 
 ## Build gem
 
-Inside the container
-
 ```
-cd /root/fluentd-plugin-juniper-telemetry
-gem build fluent-plugin-juniper-telemetry.gemspec
-gem push fluent-plugin-juniper-telemetry-XXX.gem
+make gems-build
+make gems-push
 ```
 
 ## Contributing
