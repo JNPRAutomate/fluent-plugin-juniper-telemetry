@@ -19,15 +19,21 @@ rake install
 
 This plugin include 2 parsers, one for each type of Juniper Devices data streaming type.
 
-**Juniper Telemetry Interface (jvision)**  
-Supported devices : MX (up to 15.1F5)
-`format juniper_jti`
+### Juniper Telemetry Interface (jvision)
+Supported devices : MX/PTX (up to 16.1) `format juniper_jti`
 
-**analyticsd**  
-Supported devices : EX4300 & QFX5100 (add version info)
-`format juniper_analyticsd`
+**Supported Sensors**
+ - Physical Interface > /junos/system/linecard/interface/
+ - Logical Interface > /junos/system/linecard/interface/logical/usage
+ - Firewall Filter > /junos/system/linecard/firewall/
 
-> Supported devices are listed as of March 2016, please refer to Juniper website for accurate support list
+**Experimental Sensors**
+ - LSP Statistics >  /junos/services/label-switched-path/usage/
+
+### analyticsd
+Supported devices : EX4300 & QFX5100 (add version info)  `format juniper_analyticsd`
+
+> Supported devices are listed as of December 2016, please refer to Juniper website for accurate support list
 
 --------------
 
